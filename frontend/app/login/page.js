@@ -116,26 +116,6 @@ export default function LoginPage() {
             ) : 'Sign In'}
           </button>
         </div>
-
-        {/* Demo credentials hint */}
-        <div style={{ marginTop: 16, background: '#111827', border: '1px solid #1E2D45', borderRadius: 10, padding: 16 }}>
-          <p style={{ color: '#64748B', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 10px' }}>Demo Credentials</p>
-          {[
-            { role: 'Admin', id: 'ADMIN001', pass: 'admin123', color: '#F59E0B' },
-            { role: 'Lecturer', id: 'LEC001', pass: 'lec123', color: '#8B5CF6' },
-            { role: 'Student', id: 'GIP/ND2/CSC/001', pass: 'GIP/ND2/CSC/001', color: '#10B981' },
-          ].map((c) => (
-            <div
-              key={c.role}
-              onClick={() => { setIdentifier(c.id); setPassword(c.pass); }}
-              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid #1E2D45', cursor: 'pointer' }}
-            >
-              <span style={{ fontSize: 11, color: c.color, fontWeight: 700 }}>{c.role}</span>
-              <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#94A3B8' }}>{c.id}</span>
-            </div>
-          ))}
-          <p style={{ fontSize: 11, color: '#334155', margin: '8px 0 0' }}>Click a row to auto-fill credentials</p>
-        </div>
       </div>
 
       <style>{`
