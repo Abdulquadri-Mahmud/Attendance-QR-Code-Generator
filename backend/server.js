@@ -12,7 +12,8 @@ app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
     const isLocalhost = /^http:\/\/localhost(:\d+)?$/.test(origin);
-    if (isLocalhost || origin === process.env.FRONTEND_URL) {
+    const isProjectVercel = /^https:\/\/attendance-qr-code-generator-fronte(-[a-z0-9-]+)?\.vercel\.app$/.test(origin);
+    if (isLocalhost || isProjectVercel || origin === process.env.FRONTEND_URL) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
