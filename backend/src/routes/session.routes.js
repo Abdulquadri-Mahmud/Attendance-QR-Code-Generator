@@ -35,7 +35,9 @@ router.post('/', protect, allowRoles('lecturer', 'admin'), async (req, res) => {
       date: sessionDate,
     });
 
-    const frontendUrl = req.get('origin') || process.env.FRONTEND_URL || 'http://localhost:3000';
+    // Always use the configured FRONTEND_URL — never the lecturer's browser origin.
+    // This ensures students on mobile get a QR pointing to the real production URL.
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const { dataUrl: qrCodeDataUrl, scanUrl } = await generateQR(qrToken, frontendUrl);
 
     res.status(201).json({
@@ -121,7 +123,7 @@ router.get('/:id/qr', protect, allowRoles('lecturer', 'admin'), async (req, res)
       return res.status(410).json({ success: false, message: 'Session has expired' });
     }
 
-    const frontendUrl = req.get('origin') || process.env.FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const { dataUrl: qrCodeDataUrl, scanUrl } = await generateQR(session.qrToken, frontendUrl);
 
     res.json({ success: true, qrCodeDataUrl, scanUrl, expiresAt: session.expiresAt });
@@ -151,7 +153,7 @@ router.post('/:id/rotate', protect, allowRoles('lecturer', 'admin'), async (req,
     session.qrToken = uuidv4();
     await session.save();
 
-    const frontendUrl = req.get('origin') || process.env.FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const { dataUrl: qrCodeDataUrl, scanUrl } = await generateQR(session.qrToken, frontendUrl);
 
     res.json({ success: true, qrCodeDataUrl, scanUrl });
