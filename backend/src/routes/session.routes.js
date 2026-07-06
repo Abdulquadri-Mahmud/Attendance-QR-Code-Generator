@@ -35,7 +35,7 @@ router.post('/', protect, allowRoles('lecturer', 'admin'), async (req, res) => {
       date: sessionDate,
     });
 
-    const frontendUrl = 'https://attendance-qr-code-generator-fronte.vercel.app';
+    const frontendUrl = req.get('origin') || process.env.FRONTEND_URL || 'http://localhost:3000';
     const { dataUrl: qrCodeDataUrl, scanUrl } = await generateQR(qrToken, frontendUrl);
 
     res.status(201).json({
@@ -121,7 +121,7 @@ router.get('/:id/qr', protect, allowRoles('lecturer', 'admin'), async (req, res)
       return res.status(410).json({ success: false, message: 'Session has expired' });
     }
 
-    const frontendUrl = 'https://attendance-qr-code-generator-fronte.vercel.app';
+    const frontendUrl = req.get('origin') || process.env.FRONTEND_URL || 'http://localhost:3000';
     const { dataUrl: qrCodeDataUrl, scanUrl } = await generateQR(session.qrToken, frontendUrl);
 
     res.json({ success: true, qrCodeDataUrl, scanUrl, expiresAt: session.expiresAt });
@@ -151,7 +151,7 @@ router.post('/:id/rotate', protect, allowRoles('lecturer', 'admin'), async (req,
     session.qrToken = uuidv4();
     await session.save();
 
-    const frontendUrl = 'https://attendance-qr-code-generator-fronte.vercel.app';
+    const frontendUrl = req.get('origin') || process.env.FRONTEND_URL || 'http://localhost:3000';
     const { dataUrl: qrCodeDataUrl, scanUrl } = await generateQR(session.qrToken, frontendUrl);
 
     res.json({ success: true, qrCodeDataUrl, scanUrl });

@@ -376,23 +376,23 @@ export default function LecturerDashboard() {
 
                   {/* QR image with a thin progress-ring border that drains over 30 s */}
                   <div style={{ position: 'relative', display: 'inline-block' }}>
-                    <svg width="236" height="236" style={{ position: 'absolute', top: -6, left: -6, transform: 'rotate(-90deg)', pointerEvents: 'none' }}>
+                    <svg width="276" height="276" style={{ position: 'absolute', top: -8, left: -8, transform: 'rotate(-90deg)', pointerEvents: 'none', zIndex: 10 }}>
                       {/* Background ring */}
-                      <circle cx="118" cy="118" r="110" fill="none" stroke="#1E2D45" strokeWidth="4" />
+                      <circle cx="138" cy="138" r="130" fill="none" stroke="#1E2D45" strokeWidth="4" />
                       {/* Animated countdown arc */}
                       <circle
-                        cx="118" cy="118" r="110"
+                        cx="138" cy="138" r="130"
                         fill="none"
                         stroke="#3B82F6"
                         strokeWidth="4"
-                        strokeDasharray={`${2 * Math.PI * 110}`}
-                        strokeDashoffset={`${2 * Math.PI * 110 * (1 - rotateCountdown / 30)}`}
+                        strokeDasharray={`${2 * Math.PI * 130}`}
+                        strokeDashoffset={`${2 * Math.PI * 130 * (1 - rotateCountdown / 30)}`}
                         strokeLinecap="round"
                         style={{ transition: 'stroke-dashoffset 1s linear' }}
                       />
                     </svg>
-                    <div style={{ display: 'inline-block', background: 'white', padding: 12, borderRadius: 12 }}>
-                      <img src={qrImage} alt="Attendance QR Code" style={{ width: 200, height: 200, display: 'block' }} />
+                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'white', width: 260, height: 260, borderRadius: '50%', padding: 24, boxSizing: 'border-box' }}>
+                      <img src={qrImage} alt="Attendance QR Code" style={{ width: 180, height: 180, display: 'block' }} />
                     </div>
                   </div>
 
