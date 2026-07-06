@@ -155,18 +155,48 @@ router.patch('/users/:id/toggle', protect, allowRoles('admin'), async (req, res)
 // PUT /api/admin/users/:id — Update user details
 router.put('/users/:id', protect, allowRoles('admin'), async (req, res) => {
   try {
-    const { fullName, department, level, email } = req.body;
-    const updateData = {};
-    if (fullName) updateData.fullName = fullName.trim();
-    if (department) updateData.department = department.trim();
-    if (level) updateData.level = level;
-    if (email) updateData.email = email.trim().toLowerCase();
-
-    const user = await User.findByIdAndUpdate(req.params.id, updateData, { new: true }).select('-passwordHash');
+    const { fullName, role, department, level, email, matricNumber, staffId } = req.body;
+    
+    const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-    res.json({ success: true, message: 'User updated', user });
+    if (fullName !== undefined) user.fullName = fullName.trim();
+    if (role !== undefined) user.role = role;
+    if (department !== undefined) user.department = department.trim();
+    if (level !== undefined) user.level = level;
+    if (email !== undefined) user.email = email ? email.trim().toLowerCase() : undefined;
+
+    // Apply role-based ID fields and clear the other
+    const currentRole = role || user.role;
+    if (currentRole === 'student') {
+      if (matricNumber !== undefined) {
+        if (!matricNumber.trim()) {
+          return res.status(400).json({ success: false, message: 'Matric number is required for students' });
+        }
+        user.matricNumber = matricNumber.trim().toUpperCase();
+      }
+      user.staffId = undefined; // clear staff ID for students
+    } else {
+      if (staffId !== undefined) {
+        if (!staffId.trim()) {
+          return res.status(400).json({ success: false, message: 'Staff ID is required for lecturers/admins' });
+        }
+        user.staffId = staffId.trim().toUpperCase();
+      }
+      user.matricNumber = undefined; // clear matric number for lecturers/admins
+    }
+
+    await user.save();
+
+    // Remove passwordHash from response
+    const updatedUser = user.toJSON();
+
+    res.json({ success: true, message: 'User updated successfully', user: updatedUser });
   } catch (err) {
+    if (err.code === 11000) {
+      const field = err.keyPattern?.matricNumber ? 'Matric number' : 'Staff ID';
+      return res.status(409).json({ success: false, message: `${field} already exists in the system` });
+    }
     res.status(500).json({ success: false, message: err.message });
   }
 });

@@ -16,6 +16,10 @@ export default function AdminStudents() {
   const [form, setForm] = useState({ fullName: '', role: 'student', department: '', level: 'ND1', matricNumber: '', staffId: '', email: '' });
   const [submitting, setSubmitting] = useState(false);
 
+  // Edit state
+  const [editingUser, setEditingUser] = useState(null);
+  const [editForm, setEditForm] = useState({ fullName: '', role: 'student', department: '', level: 'ND1', matricNumber: '', staffId: '', email: '' });
+
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
@@ -54,6 +58,32 @@ export default function AdminStudents() {
       fetchUsers();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to create user');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleUpdate = async () => {
+    if (!editForm.fullName || !editForm.role || !editForm.department) {
+      toast.error('Full name, role, and department are required');
+      return;
+    }
+    if (editForm.role === 'student' && !editForm.matricNumber) {
+      toast.error('Matric number is required for students');
+      return;
+    }
+    if ((editForm.role === 'lecturer' || editForm.role === 'admin') && !editForm.staffId) {
+      toast.error('Staff ID is required for lecturers and admins');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await api.put(`/admin/users/${editingUser._id}`, editForm);
+      toast.success('User updated successfully!');
+      setEditingUser(null);
+      fetchUsers();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update user');
     } finally {
       setSubmitting(false);
     }
@@ -143,6 +173,65 @@ export default function AdminStudents() {
           </div>
         )}
 
+        {/* Edit User Form */}
+        {editingUser && (
+          <div style={{ background: '#111827', border: '1px solid #F59E0B44', borderTop: '3px solid #F59E0B', borderRadius: 12, padding: 24, marginBottom: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h2 style={{ fontSize: 14, fontWeight: 700, color: '#F1F5F9', margin: 0 }}>✏️ Edit User: {editingUser.fullName}</h2>
+              <button onClick={() => setEditingUser(null)} style={{ background: 'transparent', border: '1px solid #334155', borderRadius: 6, padding: '4px 12px', color: '#64748B', fontSize: 12, cursor: 'pointer' }}>✕ Cancel</button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div>
+                <label style={labelStyle}>Full Name *</label>
+                <input value={editForm.fullName} onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })} placeholder="e.g. Abubakar Musa Ibrahim" style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Role *</label>
+                <select value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })} style={inputStyle}>
+                  <option value="student">Student</option>
+                  <option value="lecturer">Lecturer</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Department *</label>
+                <input value={editForm.department} onChange={(e) => setEditForm({ ...editForm, department: e.target.value })} placeholder="e.g. Computer Science" style={inputStyle} />
+              </div>
+              {editForm.role === 'student' && (
+                <>
+                  <div>
+                    <label style={labelStyle}>Level</label>
+                    <select value={editForm.level} onChange={(e) => setEditForm({ ...editForm, level: e.target.value })} style={inputStyle}>
+                      {['ND1', 'ND2', 'HND1', 'HND2'].map(l => <option key={l} value={l}>{l}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Matric Number *</label>
+                    <input value={editForm.matricNumber} onChange={(e) => setEditForm({ ...editForm, matricNumber: e.target.value.toUpperCase() })} placeholder="e.g. GIP/ND2/CSC/006" style={inputStyle} />
+                  </div>
+                </>
+              )}
+              {(editForm.role === 'lecturer' || editForm.role === 'admin') && (
+                <div>
+                  <label style={labelStyle}>Staff ID *</label>
+                  <input value={editForm.staffId} onChange={(e) => setEditForm({ ...editForm, staffId: e.target.value.toUpperCase() })} placeholder="e.g. LEC003" style={inputStyle} />
+                </div>
+              )}
+              <div>
+                <label style={labelStyle}>Email (optional)</label>
+                <input value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} placeholder="e.g. staff@gateway.edu.ng" type="email" style={inputStyle} />
+              </div>
+            </div>
+            <button
+              onClick={handleUpdate}
+              disabled={submitting}
+              style={{ marginTop: 16, background: '#F59E0B', border: 'none', borderRadius: 8, padding: '10px 20px', color: 'white', fontSize: 14, fontWeight: 700, cursor: submitting ? 'not-allowed' : 'pointer' }}
+            >
+              {submitting ? 'Saving...' : '💾 Save Changes'}
+            </button>
+          </div>
+        )}
+
         {/* Role Filter Tabs */}
         <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
           {['student', 'lecturer', 'admin'].map((r) => (
@@ -186,13 +275,34 @@ export default function AdminStudents() {
                           {u.isActive ? 'ACTIVE' : 'INACTIVE'}
                         </span>
                       </td>
-                      <td style={{ padding: '10px 14px' }}>
-                        <button
-                          onClick={() => toggleUser(u._id, u.isActive)}
-                          style={{ background: u.isActive ? '#450A0A' : '#064E3B', border: `1px solid ${u.isActive ? '#EF4444' : '#10B981'}`, color: u.isActive ? '#EF4444' : '#10B981', padding: '4px 10px', borderRadius: 5, fontSize: 11, cursor: 'pointer', fontWeight: 600 }}
-                        >
-                          {u.isActive ? 'Deactivate' : 'Activate'}
-                        </button>
+                      <td style={{ padding: '10px 14px', whiteSpace: 'nowrap' }}>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <button
+                            onClick={() => {
+                              setEditingUser(u);
+                              setEditForm({
+                                fullName: u.fullName || '',
+                                role: u.role || 'student',
+                                department: u.department || '',
+                                level: u.level || 'ND1',
+                                matricNumber: u.matricNumber || '',
+                                staffId: u.staffId || '',
+                                email: u.email || '',
+                              });
+                              setShowForm(false);
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            style={{ background: '#1E293B', border: '1px solid #334155', color: '#F1F5F9', padding: '4px 10px', borderRadius: 5, fontSize: 11, cursor: 'pointer', fontWeight: 600 }}
+                          >
+                            ✏️ Edit
+                          </button>
+                          <button
+                            onClick={() => toggleUser(u._id, u.isActive)}
+                            style={{ background: u.isActive ? '#450A0A' : '#064E3B', border: `1px solid ${u.isActive ? '#EF4444' : '#10B981'}`, color: u.isActive ? '#EF4444' : '#10B981', padding: '4px 10px', borderRadius: 5, fontSize: 11, cursor: 'pointer', fontWeight: 600 }}
+                          >
+                            {u.isActive ? 'Deactivate' : 'Activate'}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

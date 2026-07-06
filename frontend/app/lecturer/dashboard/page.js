@@ -251,13 +251,36 @@ export default function LecturerDashboard() {
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '28px 20px' }}>
 
         {/* Welcome */}
-        <div style={{ marginBottom: 28 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: '#F1F5F9', margin: 0 }}>
-            Welcome, {user?.fullName?.split(' ')[0]}
-          </h1>
-          <p style={{ color: '#64748B', fontSize: 13, margin: '4px 0 0' }}>
-            {user?.department} · {activeSession ? '🟢 Session Active' : '⚪ No Active Session'}
-          </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
+          <div>
+            <h1 style={{ fontSize: 22, fontWeight: 800, color: '#F1F5F9', margin: 0 }}>
+              Welcome, {user?.fullName?.split(' ')[0]}
+            </h1>
+            <p style={{ color: '#64748B', fontSize: 13, margin: '4px 0 0' }}>
+              {user?.department} · {activeSession ? '🟢 Session Active' : '⚪ No Active Session'}
+            </p>
+          </div>
+          <button
+            onClick={() => window.location.href = '/lecturer/reports'}
+            style={{
+              background: '#1E293B',
+              border: '1px solid #334155',
+              borderRadius: 8,
+              padding: '10px 18px',
+              color: '#F1F5F9',
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              transition: 'background 0.2s',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#334155'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#1E293B'}
+          >
+            📊 Generate Reports
+          </button>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: activeSession ? '1fr 1fr' : '1fr', gap: 20, marginBottom: 28 }}>
