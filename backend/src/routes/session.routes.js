@@ -37,7 +37,7 @@ router.post('/', protect, allowRoles('lecturer', 'admin'), async (req, res) => {
 
     // Always use the configured FRONTEND_URL — never the lecturer's browser origin.
     // This ensures students on mobile get a QR pointing to the real production URL.
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000' || 'https://attendance-qr-code-generator-fronte.vercel.app';
     const { dataUrl: qrCodeDataUrl, scanUrl } = await generateQR(qrToken, frontendUrl);
 
     res.status(201).json({
